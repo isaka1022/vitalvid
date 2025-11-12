@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
     console.log("Generating video with mulmocast...");
 
     try {
-      // Try to run mulmocast command
-      const mulmoCommand = `npx mulmo movie "${scriptPath}" -o "${videoPath}"`;
+      // Try to run mulmocast command (audio only until OpenAI org is verified for images)
+      const mulmoCommand = `npx mulmo audio "${scriptPath}" -o "${videoPath}"`;
       console.log("Running command:", mulmoCommand);
 
       const { stdout, stderr } = await execAsync(mulmoCommand, {
@@ -110,17 +110,21 @@ export async function POST(request: NextRequest) {
       console.log("Mulmo stdout:", stdout);
       if (stderr) console.log("Mulmo stderr:", stderr);
 
-      // Check if video file was created
+      // mulmo audio creates a directory, find the MP3 file inside
+      const audioFileName = `${scriptFileName.replace('.json', '')}_en.mp3`;
+      const audioPath = path.join(process.cwd(), "public", "videos", videoFileName, audioFileName);
+
+      // Check if audio file was created
       try {
-        await fs.access(videoPath);
-        console.log("Video created successfully:", videoPath);
+        await fs.access(audioPath);
+        console.log("Audio created successfully:", audioPath);
       } catch {
-        throw new Error("Video file was not created");
+        throw new Error("Audio file was not created");
       }
 
       return NextResponse.json({
         success: true,
-        videoUrl: `/videos/${videoFileName}`,
+        videoUrl: `/videos/${videoFileName}/${audioFileName}`,
         evaluation,
       });
     } catch (execError: any) {

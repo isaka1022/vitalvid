@@ -8,7 +8,7 @@ import { evaluateMetric } from "@/lib/risk-evaluator";
 
 export default function Home() {
   const [bloodData, setBloodData] = useState<BloodTestData | null>(null);
-  const [generatingVideo, setGeneratingVideo] = useState<string | null>(null);
+  const [generatingVideos, setGeneratingVideos] = useState<Set<string>>(new Set());
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [currentMetric, setCurrentMetric] = useState<keyof BloodTestData | null>(null);
 
@@ -19,9 +19,9 @@ export default function Home() {
   };
 
   const handleWatchVideo = async (metricType: keyof BloodTestData) => {
-    if (!bloodData) return;
+    if (!bloodData || generatingVideos.has(metricType)) return;
 
-    setGeneratingVideo(metricType);
+    setGeneratingVideos(prev => new Set(prev).add(metricType));
     setCurrentMetric(metricType);
     setVideoUrl(null);
 
@@ -48,7 +48,11 @@ export default function Home() {
       console.error("Video generation error:", error);
       alert("動画の生成に失敗しました。もう一度お試しください。");
     } finally {
-      setGeneratingVideo(null);
+      setGeneratingVideos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(metricType);
+        return newSet;
+      });
     }
   };
 
@@ -162,7 +166,7 @@ export default function Home() {
                 unit=""
                 riskLevel={evaluateMetric("lh_ratio", bloodData.lh_ratio).risk_level}
                 onWatch={() => handleWatchVideo("lh_ratio")}
-                isGenerating={generatingVideo === "lh_ratio"}
+                isGenerating={generatingVideos.has("lh_ratio")}
               />
 
               <MetricCard
@@ -172,7 +176,7 @@ export default function Home() {
                 unit="mg/dL"
                 riskLevel={evaluateMetric("glucose", bloodData.glucose).risk_level}
                 onWatch={() => handleWatchVideo("glucose")}
-                isGenerating={generatingVideo === "glucose"}
+                isGenerating={generatingVideos.has("glucose")}
               />
 
               <MetricCard
@@ -182,7 +186,7 @@ export default function Home() {
                 unit="mg/dL"
                 riskLevel={evaluateMetric("hdl", bloodData.hdl).risk_level}
                 onWatch={() => handleWatchVideo("hdl")}
-                isGenerating={generatingVideo === "hdl"}
+                isGenerating={generatingVideos.has("hdl")}
               />
 
               <MetricCard
@@ -192,7 +196,7 @@ export default function Home() {
                 unit="mg/dL"
                 riskLevel={evaluateMetric("triglyceride", bloodData.triglyceride).risk_level}
                 onWatch={() => handleWatchVideo("triglyceride")}
-                isGenerating={generatingVideo === "triglyceride"}
+                isGenerating={generatingVideos.has("triglyceride")}
               />
             </div>
           </div>
