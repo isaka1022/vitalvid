@@ -4,26 +4,36 @@ import { useState } from "react";
 import { BloodTestData } from "@/types/blood-test";
 import { DataInputForm } from "@/components/DataInputForm";
 import { MetricCard } from "@/components/MetricCard";
+import { VoiceQA } from "@/components/VoiceQA";
 import { evaluateMetric } from "@/lib/risk-evaluator";
 
 export default function Home() {
   const [bloodData, setBloodData] = useState<BloodTestData | null>(null);
-  const [generatingVideos, setGeneratingVideos] = useState<Set<string>>(new Set());
+  const [generatingVideo, setGeneratingVideo] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [narrationText, setNarrationText] = useState<string | null>(null);
+  const [narrationTextEn, setNarrationTextEn] = useState<string | null>(null);
   const [currentMetric, setCurrentMetric] = useState<keyof BloodTestData | null>(null);
 
   const handleDataSubmit = (data: BloodTestData) => {
     setBloodData(data);
     setVideoUrl(null);
+    setAudioUrl(null);
+    setNarrationText(null);
+    setNarrationTextEn(null);
     setCurrentMetric(null);
   };
 
   const handleWatchVideo = async (metricType: keyof BloodTestData) => {
-    if (!bloodData || generatingVideos.has(metricType)) return;
+    if (!bloodData) return;
 
-    setGeneratingVideos(prev => new Set(prev).add(metricType));
+    setGeneratingVideo(metricType);
     setCurrentMetric(metricType);
     setVideoUrl(null);
+    setAudioUrl(null);
+    setNarrationText(null);
+    setNarrationTextEn(null);
 
     try {
       const response = await fetch("/api/generate-video", {
@@ -44,20 +54,22 @@ export default function Home() {
 
       const result = await response.json();
       setVideoUrl(result.videoUrl);
+      setAudioUrl(result.audioUrl);
+      setNarrationText(result.narrationText);
+      setNarrationTextEn(result.narrationTextEn);
     } catch (error) {
       console.error("Video generation error:", error);
       alert("動画の生成に失敗しました。もう一度お試しください。");
     } finally {
-      setGeneratingVideos(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(metricType);
-        return newSet;
-      });
+      setGeneratingVideo(null);
     }
   };
 
   const handleBack = () => {
     setVideoUrl(null);
+    setAudioUrl(null);
+    setNarrationText(null);
+    setNarrationTextEn(null);
     setCurrentMetric(null);
   };
 
@@ -103,6 +115,55 @@ export default function Home() {
                 </video>
               </div>
 
+              {/* Audio Player (if TTS is available) */}
+              {audioUrl && (
+                <div className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                    🎙️ AI音声ナレーション / AI Voice Narration
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                      Powered by Shisa AI
+                    </span>
+                  </h3>
+                  <audio
+                    src={audioUrl}
+                    controls
+                    className="w-full"
+                  >
+                    お使いのブラウザは音声タグをサポートしていません。
+                  </audio>
+                </div>
+              )}
+
+              {/* Narration Text (Japanese & English) */}
+              {(narrationText || narrationTextEn) && (
+                <div className="mb-6 space-y-4">
+                  {narrationText && (
+                    <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+                      <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                        📝 解説テキスト (日本語)
+                      </h3>
+                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {narrationText}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {narrationTextEn && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500">
+                      <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                        🌐 Explanation Text (English)
+                        <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                          Translated by Shisa AI
+                        </span>
+                      </h3>
+                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {narrationTextEn}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-2">📊 分析結果 / Analysis</h3>
@@ -141,6 +202,17 @@ export default function Home() {
           </div>
         )}
 
+        {/* Voice Q&A Section */}
+        <div className="mb-12">
+          <VoiceQA
+            context={
+              bloodData
+                ? `現在の血液検査データ: LH比=${bloodData.lh_ratio}, 血糖値=${bloodData.glucose}, HDL=${bloodData.hdl}, 中性脂肪=${bloodData.triglyceride}`
+                : undefined
+            }
+          />
+        </div>
+
         {/* Input Form or Dashboard */}
         {!bloodData ? (
           <DataInputForm onSubmit={handleDataSubmit} />
@@ -166,7 +238,7 @@ export default function Home() {
                 unit=""
                 riskLevel={evaluateMetric("lh_ratio", bloodData.lh_ratio).risk_level}
                 onWatch={() => handleWatchVideo("lh_ratio")}
-                isGenerating={generatingVideos.has("lh_ratio")}
+                isGenerating={generatingVideo === "lh_ratio"}
               />
 
               <MetricCard
@@ -176,7 +248,7 @@ export default function Home() {
                 unit="mg/dL"
                 riskLevel={evaluateMetric("glucose", bloodData.glucose).risk_level}
                 onWatch={() => handleWatchVideo("glucose")}
-                isGenerating={generatingVideos.has("glucose")}
+                isGenerating={generatingVideo === "glucose"}
               />
 
               <MetricCard
@@ -186,7 +258,7 @@ export default function Home() {
                 unit="mg/dL"
                 riskLevel={evaluateMetric("hdl", bloodData.hdl).risk_level}
                 onWatch={() => handleWatchVideo("hdl")}
-                isGenerating={generatingVideos.has("hdl")}
+                isGenerating={generatingVideo === "hdl"}
               />
 
               <MetricCard
@@ -196,7 +268,7 @@ export default function Home() {
                 unit="mg/dL"
                 riskLevel={evaluateMetric("triglyceride", bloodData.triglyceride).risk_level}
                 onWatch={() => handleWatchVideo("triglyceride")}
-                isGenerating={generatingVideos.has("triglyceride")}
+                isGenerating={generatingVideo === "triglyceride"}
               />
             </div>
           </div>

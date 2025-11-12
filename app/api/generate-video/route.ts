@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { BloodTestData } from "@/types/blood-test";
 import { evaluateMetric } from "@/lib/risk-evaluator";
 import { generateSimpleScriptPrompt } from "@/lib/prompts";
+import { generateShisaTTS } from "@/lib/shisa-tts";
+import { translateJaToEn } from "@/lib/shisa-translation";
 import OpenAI from "openai";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -59,6 +61,46 @@ export async function POST(request: NextRequest) {
 
     console.log("Generated narration:", narrationText);
 
+    // Translate to English using Shisa AI (optional)
+    let narrationTextEn: string | null = null;
+    if (process.env.SHISA_API_KEY) {
+      console.log("Translating to English with Shisa AI...");
+      
+      const translationResult = await translateJaToEn(narrationText);
+      
+      if (translationResult.success && translationResult.translatedText) {
+        narrationTextEn = translationResult.translatedText;
+        console.log("Translation successful:", narrationTextEn);
+      } else {
+        console.warn("Translation failed:", translationResult.error);
+      }
+    }
+
+    // Generate audio using Shisa AI TTS (optional)
+    let audioFileName: string | null = null;
+    if (process.env.SHISA_API_KEY) {
+      console.log("Generating audio with Shisa AI TTS...");
+      
+      const ttsResult = await generateShisaTTS({
+        text: narrationText,
+        voice: "ja-JP-1", // 日本語音声
+        speed: 1.0,
+        pitch: 1.0,
+      });
+
+      if (ttsResult.success && ttsResult.audioBuffer) {
+        // Save audio file
+        audioFileName = `audio-${metricType}-${timestamp}.mp3`;
+        const audioPath = path.join(process.cwd(), "public", "videos", audioFileName);
+        await fs.writeFile(audioPath, ttsResult.audioBuffer);
+        console.log("Audio saved:", audioPath);
+      } else {
+        console.warn("TTS generation failed:", ttsResult.error);
+      }
+    } else {
+      console.log("Shisa AI TTS skipped (SHISA_API_KEY not set)");
+    }
+
     // Create mulmo script JSON
     const mulmoScript = {
       $mulmocast: {
@@ -99,8 +141,8 @@ export async function POST(request: NextRequest) {
     console.log("Generating video with mulmocast...");
 
     try {
-      // Try to run mulmocast command (audio only until OpenAI org is verified for images)
-      const mulmoCommand = `npx mulmo audio "${scriptPath}" -o "${videoPath}"`;
+      // Try to run mulmocast command
+      const mulmoCommand = `npx mulmo movie "${scriptPath}" -o "${videoPath}"`;
       console.log("Running command:", mulmoCommand);
 
       const { stdout, stderr } = await execAsync(mulmoCommand, {
@@ -110,21 +152,20 @@ export async function POST(request: NextRequest) {
       console.log("Mulmo stdout:", stdout);
       if (stderr) console.log("Mulmo stderr:", stderr);
 
-      // mulmo audio creates a directory, find the MP3 file inside
-      const audioFileName = `${scriptFileName.replace('.json', '')}_en.mp3`;
-      const audioPath = path.join(process.cwd(), "public", "videos", videoFileName, audioFileName);
-
-      // Check if audio file was created
+      // Check if video file was created
       try {
-        await fs.access(audioPath);
-        console.log("Audio created successfully:", audioPath);
+        await fs.access(videoPath);
+        console.log("Video created successfully:", videoPath);
       } catch {
-        throw new Error("Audio file was not created");
+        throw new Error("Video file was not created");
       }
 
       return NextResponse.json({
         success: true,
-        videoUrl: `/videos/${videoFileName}/${audioFileName}`,
+        videoUrl: `/videos/${videoFileName}`,
+        audioUrl: audioFileName ? `/videos/${audioFileName}` : null,
+        narrationText,
+        narrationTextEn,
         evaluation,
       });
     } catch (execError: any) {
@@ -136,7 +177,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         videoUrl: null,
+        audioUrl: audioFileName ? `/videos/${audioFileName}` : null,
         fallbackText: narrationText,
+        narrationText,
+        narrationTextEn,
         evaluation,
         error: "動画生成は現在利用できません。テキスト解説をご覧ください。",
       });
