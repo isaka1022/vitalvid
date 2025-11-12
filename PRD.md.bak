@@ -1,0 +1,620 @@
+# PRD: 血液栄養解析動画生成システム (完全版)
+**Product Requirements Document v1.0**
+
+---
+
+## 📋 Product Overview
+
+### Product Name
+**VitalVid** (バイタルビッド)
+
+**意味**: Vital (生命兆候・健康数値) + Vid (Video)  
+**Tagline**: "Your Health, Explained in Seconds"  
+（あなたの健康を、数秒で理解する）
+
+### その他の候補名
+1. **Kensa.video** (ケンサ・ビデオ) - 検査 + video
+2. **TestTalk** - 検査結果が話す
+3. **VitalVoice** - 健康の声
+4. **BloodLens** - 血液検査のレンズ
+
+---
+
+### Vision Statement
+血液検査結果を誰でも理解できるように、動画を"説明UI"として使う次世代健康ダッシュボード。
+
+### One-Liner
+**「血液検査をアップロードすると、各数値の意味を解説する動画が即座に生成される健康管理システム」**
+
+---
+
+## 🎯 Problem Statement
+
+### Current Problems
+1. **健康診断の結果が理解できない**
+   - 数値だけ渡されても、何を意味するのか分からない
+   - 医師の説明は短時間で覚えきれない
+   - 紙の資料は読まれずに放置される
+
+2. **パーソナライズされた説明が不足**
+   - 一般的な基準値しか記載されていない
+   - 個人の状況に合わせた改善策が提示されない
+
+3. **企業の健康経営コストが高い**
+   - 従業員への健康指導に膨大な人的コストがかかる
+   - フォローアップが不十分で改善率が低い
+
+### Why Now?
+- Video Generation APIの進化（Veo 3, Runway Gen-3）
+- コスト低下（数秒の動画が数ドル → 近未来は無料）
+- AI音声の自然さの向上（ElevenLabs, OpenAI TTS）
+- 企業の健康経営への関心増加
+
+---
+
+## 💡 Solution
+
+### Core Concept
+**「動画をプリミティブとして使う」健康ダッシュボード**
+
+従来：静的なテキスト・グラフで説明  
+新提案：クリックすると即座に動画が生成され、パーソナライズされた解説が流れる
+
+### Key Innovation
+- 動画は「最終出力物」ではなく「UIコンポーネント」
+- 各数値に対して動的に生成される説明レイヤー
+- テキストの代わりに動画が"当たり前"に機能
+
+### YC RFS Alignment
+✅ **Video Generation as a Primitive**
+- 動画を「コンテンツ」ではなく「UI」として使用
+- ユーザーのアクション（クリック）に応じて動的生成
+- 静的テキストの代替としての動画
+
+✅ **AI Native Enterprise Software**
+- 企業の健康経営市場にアプローチ可能
+- 従来の健康指導を10倍効率化
+
+---
+
+## 👥 Target Users
+
+### Primary (MVP)
+**健康意識の高い個人**
+- 年齢：30-50代
+- 特徴：健康診断結果を改善したいが、専門知識がない
+- ペイン：医師に質問する時間がない、ネット情報が信頼できない
+
+### Secondary (Phase 2以降)
+**企業の人事・健康管理部門**
+- 従業員100名以上の企業
+- 健康経営に力を入れている
+- 課題：健康指導のコストと効率
+
+---
+
+## ✨ Key Features (MVP - 4時間実装)
+
+### Must Have (P0)
+
+#### 1. 血液検査データ入力
+- [ ] 手動入力UI（LH比、血糖値、HDL/LDL、中性脂肪）
+- [ ] サンプルデータのプリセット
+
+#### 2. ダッシュボード表示
+- [ ] 数値の一覧表示
+- [ ] リスクレベルの色分け（正常/注意/要改善）
+- [ ] クリッカブルな数値カード
+
+#### 3. 動画解説生成 ★コア機能
+- [ ] 数値をクリックすると動画生成開始
+- [ ] GPT-4で解説台本生成（60秒）
+  - 数値の意味
+  - リスク評価
+  - 具体的な改善アクション
+  - 目標数値
+- [ ] ElevenLabsで音声生成
+- [ ] 静的スライド動画生成（Pillow + ffmpeg）
+- [ ] インラインで動画再生
+
+#### 4. 専門知識の反映
+- [ ] LH比の解説ロジック
+- [ ] 血糖値の解説ロジック
+- [ ] HDL/LDLの解説ロジック
+- [ ] 精密栄養学に基づくプロンプト設計
+
+### Nice to Have (P1 - 時間があれば)
+- [ ] PDF/画像からのOCR自動抽出（Vision API）
+- [ ] D-ID/Runwayでトーキングアバター
+- [ ] 複数の検査結果の推移グラフ
+- [ ] 動画のトーン選択（優しい/専門的）
+- [ ] 動画のダウンロード機能
+
+### Out of Scope (v1では含まない)
+- ❌ ユーザー認証・ログイン機能
+- ❌ データベース保存
+- ❌ 複数ユーザー対応
+- ❌ スマホアプリ
+
+---
+
+## 🏗️ Technical Architecture
+
+### Tech Stack (確定版)
+
+#### Frontend
+- **Next.js 14** (App Router + TypeScript)
+- **Tailwind CSS** + **shadcn/ui** (モダンなUIコンポーネント)
+- **日英併記UI** (UIラベルのみ)
+
+#### Backend / AI
+- **TypeScript / Node.js**
+- **OpenAI API (GPT-4)**: データ分析 + mulmoスクリプト生成
+- **mulmocast-cli**: AI動画生成フレームワーク
+  - 音声生成、動画生成、編集を統合
+  - 参照: https://github.com/receptron/mulmocast-cli
+
+#### Infrastructure (MVP)
+- **Vercel** (Next.js最適化デプロイ)
+- **事前生成動画** (フォールバック用3-4個)
+
+### Tools List (5つでボーナス+25%)
+1. **OpenAI** (GPT-4) - Data analysis + Mulmo script generation
+2. **mulmocast-cli** - AI-powered video generation
+3. **Next.js** - Full-stack framework
+4. **shadcn/ui** - UI component library
+5. **Vercel** - Deployment platform
+
+### System Flow
+
+```
+[1] ユーザーが血液検査データを入力
+    ↓
+[2] ダッシュボードに数値表示（リスク判定）
+    ↓
+[3] ユーザーが気になる数値をクリック
+    ↓
+[4] Next.js API Routes で処理開始
+    ├─ GPT-4: データ分析 + リスク評価
+    ├─ GPT-4: mulmoスクリプト（JSON）生成
+    │   └─ 精密栄養学の専門知識を反映
+    ├─ mulmoスクリプトをファイルに保存
+    └─ mulmocast CLI実行 (npx mulmo movie)
+        ├─ AI音声生成
+        ├─ 動画シーン生成
+        └─ 最終動画出力
+    ↓
+[5] 動画をUIで再生（インライン）
+    ↓
+[6] ユーザーが理解して次のアクション
+```
+
+### Data Model (MVP - セッション保持)
+
+```typescript
+// types/blood-test.ts
+export interface BloodTestData {
+  ldl: number;        // LDLコレステロール (mg/dL)
+  hdl: number;        // HDLコレステロール (mg/dL)
+  lh_ratio: number;   // LH比
+  glucose: number;    // 血糖値 (mg/dL)
+  triglyceride: number; // 中性脂肪 (mg/dL)
+}
+
+export type RiskLevel = "normal" | "warning" | "danger";
+
+export interface RiskEvaluation {
+  metric_name: string;
+  metric_value: number;
+  risk_level: RiskLevel;
+  target_value: number;
+  recommendations: string[];
+}
+
+export interface VideoExplanation {
+  metric_name: string;        // "LH比 (LH Ratio)"
+  metric_value: number;       // 実測値
+  mulmo_script: object;       // mulmoスクリプト（JSON）
+  video_path: string;         // 生成動画パス
+  risk_evaluation: RiskEvaluation;
+}
+```
+
+---
+
+## 🏆 Hackathon Strategy
+
+### Scoring Optimization
+
+#### 1. Technical Execution (Target: 5/5)
+**戦略**:
+- ✅ 3つの数値で完全動作（LH比、血糖値、HDL/LDL）
+- ✅ エラーハンドリング徹底
+- ✅ Plan B: 事前生成した動画をバックアップ
+- ✅ スムーズなUI/UX（ローディング表示）
+
+**デモ中の失敗を防ぐ**: 
+- リハーサル3回以上
+- API failover準備
+
+#### 2. Creativity (Target: 5/5)
+**戦略**:
+- ✅ 「動画がプリミティブ」を強調
+- ✅ 従来の静的レポートとの対比を見せる
+- ✅ "First-of-its-kind in health sector"
+
+**プレゼンポイント**:
+- 「動画は最終出力ではなく、UIの一部です」
+- 「テキストボックスと同じように、動画ボックスが機能します」
+
+#### 3. Applicability (Target: 5/5)
+**戦略**:
+- ✅ 普遍的ニーズ（全国民が健康診断を受ける）
+- ✅ B2B市場明確（企業健康経営）
+- ✅ 審査員自身が「欲しい」と思う体験
+
+**プレゼンポイント**:
+- 「日本だけで年間8000万人が健康診断を受けています」
+- 「そのうち何%が結果を理解していますか？」
+
+#### 4. Fundability (Target: 4-5/5)
+**戦略**:
+- ✅ 明確な収益モデル
+- ✅ スケーラビリティの説明
+- ✅ 市場規模の提示
+
+**ビジネスモデル**:
+```
+Phase 1: B2C Freemium
+- 無料: 月3回まで
+- Pro: ¥980/月 (unlimited + 履歴保存)
+
+Phase 2: B2B SaaS ★本命
+- 従業員数 × ¥300/月
+- 健康指導コスト 60%削減
+- ROI: 年間¥50万/100名 → ¥3万/100名
+
+市場規模:
+- 日本企業 420万社
+- 従業員100名以上: 約3万社
+- TAM: ¥1,080億円 (30,000社 × 100名 × ¥300 × 12ヶ月)
+```
+
+### Bonus Multipliers Strategy
+
+#### Tools (+25%)
+1. OpenAI (GPT-4) - Script generation
+2. ElevenLabs - Voice synthesis
+3. Runway/D-ID - Video generation
+4. Anthropic (Claude) - Data analysis
+5. Streamlit - UI framework
+
+#### Presentation Tips
+- Start with problem (relatable to judges)
+- Show "before/after" comparison
+- Live demo with real blood test data
+- End with business potential
+
+---
+
+## 📊 Success Metrics
+
+### Demo Success Criteria (Hackathon)
+- [ ] 3つ以上の数値で動画生成が動作
+- [ ] 動画生成時間 < 15秒/動画（ユーザー体感）
+- [ ] 審査員が「これ使いたい」と言う
+- [ ] 技術的な質問に答えられる
+- [ ] デモ中にクラッシュしない
+
+### Future Metrics (Product)
+- ユーザーの健康リテラシー向上率: +40%
+- 企業の健康指導コスト削減率: 60%
+- 動画視聴完了率: >80%
+- 改善アクション実行率: >30%
+- NPS (Net Promoter Score): >50
+
+---
+
+## 📅 Implementation Timeline (6-8時間)
+
+### Phase 1 (0:00-1:30): プロジェクト基盤構築
+- [ ] Next.js + TypeScript プロジェクト作成
+- [ ] 必要なパッケージインストール
+  - mulmocast-cli
+  - shadcn/ui コンポーネント
+  - Tailwind CSS設定
+- [ ] 環境変数設定（`.env.local`）
+  - OpenAI API Key
+- [ ] 基本的なフォルダ構造
+  - `/app` - Next.js App Router
+  - `/components` - Reactコンポーネント
+  - `/lib` - ユーティリティ関数
+  - `/types` - TypeScript型定義
+  - `/public/videos` - 生成動画保存先
+
+### Phase 2 (1:30-3:30): データモデルとUI
+- [ ] TypeScript型定義（`types/blood-test.ts`）
+- [ ] リスク評価ロジック（`lib/risk-evaluator.ts`）
+- [ ] UIコンポーネント実装
+  - データ入力フォーム（日英併記）
+  - ダッシュボードカード（数値表示、リスク色分け）
+  - 動画プレーヤーコンポーネント
+  - ローディングステート
+- [ ] サンプルデータプリセット
+
+### Phase 3 (3:30-5:30): AI統合とmulmoスクリプト生成
+- [ ] GPT-4プロンプト設計（`lib/prompts.ts`）
+  - 血液検査データの分析
+  - mulmoスクリプト形式でのシナリオ生成
+  - 精密栄養学の専門知識を反映
+- [ ] API Routes実装（`/app/api/generate-video/route.ts`）
+- [ ] エラーハンドリングとフォールバック
+
+### Phase 4 (5:30-7:00): mulmocast統合とテスト
+- [ ] mulmocast CLI実行ロジック
+- [ ] 生成動画の配信設定
+- [ ] フロントエンドとバックエンド統合
+- [ ] 3つの指標でテストケース実行
+
+### Phase 5 (7:00-8:00): デプロイと最終調整
+- [ ] Vercel デプロイ設定
+- [ ] パフォーマンス最適化
+- [ ] デモリハーサル
+
+---
+
+## 🎨 UI/UX Design
+
+### Main Screen: ダッシュボード（日英併記）
+```
+┌─────────────────────────────────────┐
+│  🩺 VitalVid                         │
+│  Your Health, Explained in Seconds   │
+├─────────────────────────────────────┤
+│  血液検査結果分析 (Blood Test Analysis)│
+│                                     │
+│  ┌──────────┐  ┌──────────┐        │
+│  │ LH比      │  │ 血糖値    │        │
+│  │ LH Ratio  │  │ Glucose   │        │
+│  │ 2.5  ⚠️  │  │ 110 ✅   │        │
+│  │ リスク中  │  │ 正常範囲  │        │
+│  │ Medium    │  │ Normal    │        │
+│  │ [Watch▶️]│  │ [Watch▶️]│        │
+│  └──────────┘  └──────────┘        │
+│                                     │
+│  ┌──────────┐  ┌──────────┐        │
+│  │ HDL       │  │ 中性脂肪  │        │
+│  │ HDL-C     │  │Triglyceride│      │
+│  │ 55 ✅    │  │ 150 ⚠️  │        │
+│  │ 良好      │  │ やや高め  │        │
+│  │ Good      │  │ Elevated  │        │
+│  │ [Watch▶️]│  │ [Watch▶️]│        │
+│  └──────────┘  └──────────┘        │
+└─────────────────────────────────────┘
+```
+
+### Video Explanation Screen（日英併記）
+```
+┌─────────────────────────────────────┐
+│  ← 戻る (Back)  LH比の解説 (LH Ratio)│
+├─────────────────────────────────────┤
+│  生成中... (Generating...) ⏳       │
+│  ┌──────────────────────────────┐  │
+│  │                              │  │
+│  │    [動画プレーヤー]           │  │
+│  │    [Video Player]            │  │
+│  │                              │  │
+│  │  「あなたのLH比は2.5です...」 │  │
+│  │                              │  │
+│  └──────────────────────────────┘  │
+│                                     │
+│  📊 分析結果 (Analysis)              │
+│  あなたの数値 (Your Value): 2.5      │
+│  🎯 目標数値 (Target): 2.0以下       │
+│                                     │
+│  💡 改善アクション (Actions)         │
+│  ✓ 青魚を週3回食べる                │
+│    (Eat fish 3x/week)              │
+│  ✓ トランス脂肪酸を避ける           │
+│    (Avoid trans fats)              │
+│  ✓ 有酸素運動を週150分              │
+│    (150min cardio/week)            │
+│                                     │
+│  [📥 動画をダウンロード (Download)] │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 🎬 Demo Script (60秒)
+
+### [0-10秒] Problem Statement
+**話者**: 「健康診断の結果、ちゃんと理解してますか？」  
+**画面**: 一般的な健康診断レポート（数値だけ）を表示  
+**ナレーション**: 「多くの人は数値の意味が分からず、そのまま放置しています」
+
+### [10-20秒] Solution Introduction
+**話者**: 「VitalVidは、動画をUIとして使う次世代健康ダッシュボードです」  
+**画面**: VitalVidロゴ + コンセプト説明
+
+### [20-50秒] Live Demo ★最重要
+1. **[20-25秒]** データ入力
+   - サンプルデータをロード
+   - ダッシュボード表示
+
+2. **[25-35秒]** インタラクション
+   - LH比（⚠️警告）をクリック
+   - 「生成中...」表示（3秒）
+   - 動画が再生開始
+
+3. **[35-45秒]** 動画内容
+   - 「あなたのLH比は2.5です。これは動脈硬化のリスクがやや高い状態を示しています...」
+   - グラフ・数値が表示されながら解説
+
+4. **[45-50秒]** アクション提示
+   - 改善アクションリスト表示
+   - 「このように、誰でも自分の健康状態を理解できます」
+
+### [50-60秒] Business Potential
+**話者**: 「企業の健康指導コストを60%削減します」  
+**画面**: 
+- 市場規模: ¥1,080億円
+- 収益モデル: 従業員数 × ¥300/月
+
+**クロージング**: 「動画をプリミティブとして使う、新しい健康体験です」
+
+---
+
+## 🔒 Privacy & Security
+
+### MVP Approach
+- ローカル処理のみ（データ保存なし）
+- セッション終了時にデータ削除
+- API通信は暗号化（HTTPS）
+
+### Legal Compliance
+- **免責事項**: 「本サービスは医師の診断に代わるものではありません」
+- **薬機法対応**: 医療機器ではなく情報提供サービス
+- **Phase 2**: 管理栄養士監修を受ける
+
+### Future Considerations
+- HIPAA準拠（米国展開時）
+- GDPR対応（EU展開時）
+- 個人情報保護法準拠（日本）
+- データ匿名化・暗号化
+
+---
+
+## 💰 Business Model
+
+### Phase 1: B2C Freemium
+**無料プラン**
+- 月3回まで解析
+- 基本的な解説動画
+
+**Proプラン (¥980/月)**
+- 無制限解析
+- 過去データ保存・推移グラフ
+- 高度な分析（食事提案等）
+- 動画ダウンロード
+
+### Phase 2: B2B SaaS ★本命
+**価格モデル**
+- 従業員数 × ¥300/月
+- 最低契約: 100名〜
+
+**ROI提示**
+```
+従来の健康指導コスト:
+¥50万/年 (100名、産業医・保健師人件費)
+
+VitalVid導入後:
+¥36万/年 (¥300 × 100名 × 12ヶ月)
+
+削減額: ¥14万/年 (28%削減)
+※実際は指導の質向上で改善率UPによりさらなるコスト削減
+```
+
+### Phase 3: API/SDK提供
+- 健康アプリ開発者向けAPI
+- 動画生成SDKのライセンス販売
+
+---
+
+## 📝 Open Questions / Risks
+
+### Technical Risks
+- [ ] 動画生成時間が30秒を超える → Plan Bで対応
+- [ ] API制限・コスト → フリートライアル枠内で運用
+- [ ] 日本語音声の自然さ → ElevenLabsは日本語対応OK
+
+### Business Risks
+- [ ] 医療行為との境界線 → 免責事項明記
+- [ ] 専門家監修の必要性 → Phase 2で対応
+- [ ] 競合の出現 → 専門知識が参入障壁
+
+### Mitigation Strategy
+- 「情報提供サービス」として明確に位置づけ
+- 管理栄養士・産業医との連携体制構築
+- 精密栄養学の専門知識を深掘り
+
+---
+
+## 🚀 Next Steps
+
+### Immediate (今日)
+- [x] PRD確定
+- [ ] 技術スタック最終確認
+- [ ] API アカウント準備
+  - OpenAI API key
+  - ElevenLabs API key
+  - Anthropic API key
+- [ ] サンプルデータ準備
+
+### Pre-Hackathon (前日)
+- [ ] 開発環境構築
+- [ ] プロンプトテンプレート作成
+- [ ] デモシナリオ最終確認
+- [ ] リハーサル実施
+
+### During Hackathon (6-8時間)
+- [ ] Phase 1: プロジェクト基盤構築
+- [ ] Phase 2: データモデルとUI
+- [ ] Phase 3: AI統合とmulmoスクリプト生成
+- [ ] Phase 4: mulmocast統合とテスト
+- [ ] Phase 5: デプロイと最終調整
+
+### Post-Hackathon
+- [ ] フィードバック収集
+- [ ] Phase 2 機能検討
+- [ ] ビジネス展開計画
+
+---
+
+## 📚 References
+
+### External
+- [YC RFS - Video Generation as a Primitive](https://www.ycombinator.com/rfs)
+- VIBE25-5: Welcome to San Fransokyo Hackathon
+
+### Internal (Obsidian Vault)
+- [[精密医療カウンセリング/README]]
+- [[LH比とは？]]
+- [[血糖のコントロール]]
+- [[カウンセリングテンプレート集]]
+- [[ケトン体になったときの脳のエネルギー源とは？]]
+
+---
+
+## 📌 Appendix
+
+### Tools Submission (Bonus +25%)
+```
+OpenAI, mulmocast-cli, Next.js, shadcn/ui, Vercel
+```
+
+### Team Structure (Solo Founder)
+- **Founder/Engineer**: 精密栄養学の専門知識を保有
+- **Domain Expertise**: 血液検査分析、LH比、血糖コントロール
+- **Tech Stack**: TypeScript, Next.js, AI/ML, Video Generation (mulmocast)
+
+---
+
+**Document Version**: v2.0 (TypeScript版)
+**Updated**: 2025-11-12  
+**Product Name**: **VitalVid**  
+**Tagline**: "Your Health, Explained in Seconds"  
+**Tech Stack**: TypeScript + Next.js + mulmocast  
+**Status**: Ready for Implementation 🚀  
+**Event**: VIBE25-5 Hackathon (6-8 hours)
+
+---
+
+## 💪 Success Mantra
+
+> 「完璧主義より実行。6割の完成度でデモを動かす。」
+> 
+> 福永活也氏の仕事術より：
+> **「精神的土台によって挑戦を常態化し、その挑戦を具体的な高速実行スキルで完遂する」**
+
+**Let's build VitalVid! 🩺✨**
