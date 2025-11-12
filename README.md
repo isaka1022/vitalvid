@@ -15,6 +15,19 @@ VitalVidは、血液検査の数値を誰でも理解できるように、AI生�
 - 🧪 **精密栄養学に基づく解説** - LH比、血糖値、HDL/LDLなど主要指標を分析
 - 💡 **具体的なアクションプラン** - 改善のための実践的なアドバイスを提供
 
+## 🌐 ライブデモ / Live Demo
+
+本番環境で動作中のアプリケーションをご覧ください：
+
+**🚀 デプロイURL**: https://vitalvid-7iogk2utw-isaka1022s-projects.vercel.app
+
+### 利用可能な機能
+- 🎥 血液検査結果の動画解説生成
+- 🎙️ AI音声ナレーション（Shisa AI TTS）
+- 🌐 日英リアルタイム翻訳（Shisa AI Translation）
+- 🎤 音声Q&A（音声で質問→音声で回答）
+- 📊 リスクレベル分析とアクションプラン
+
 ## 技術スタック / Tech Stack
 
 - **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
@@ -61,15 +74,30 @@ npm run dev
 
 ### 4. mulmocastの設定 (動画生成用)
 
-```bash
-# mulmocastをグローバルインストール (オプション)
-npm install -g mulmocast
+mulmocastは既にプロジェクトにインストールされていますが、ffmpegが必要です：
 
+```bash
 # ffmpegのインストール (macOS)
 brew install ffmpeg
 
+# Linux (Ubuntu/Debian)
+sudo apt update && sudo apt install ffmpeg
+
+# Windows (Chocolatey)
+choco install ffmpeg
+
 # または公式サイトからダウンロード
 # https://ffmpeg.org/download.html
+```
+
+**動画生成のテスト:**
+
+```bash
+# テスト動画を生成して動作確認
+npx mulmo movie test-mulmo.json -o public/videos/test-output.mp4
+
+# 成功すると以下のファイルが生成されます:
+# public/videos/test-output.mp4/mulmo-xxx_en.mp4
 ```
 
 ## 使い方 / Usage
@@ -171,6 +199,66 @@ vitalvid/
 - [ ] 企業向け管理画面
 - [ ] API/SDK提供
 - [ ] 多言語対応（中国語、韓国語など）
+
+## トラブルシューティング / Troubleshooting
+
+### エラー: "OpenAI API key is required"
+
+**原因**: OPENAI_API_KEYが設定されていない、または読み込まれていない
+
+**解決方法**:
+1. `.env.local`ファイルがプロジェクトルートに存在することを確認
+2. ファイル内に`OPENAI_API_KEY=sk-proj-xxx`が正しく記載されているか確認
+3. 開発サーバーを再起動（Ctrl+C → `npm run dev`）
+
+### エラー: "動画生成に失敗しました"
+
+**原因**:
+- mulmocastのインストール不完全
+- ffmpegがインストールされていない
+- OpenAI APIの制限
+
+**解決方法**:
+
+```bash
+# 1. ffmpegがインストールされているか確認
+ffmpeg -version
+
+# 2. mulmocastを再インストール
+npm install mulmocast@latest
+
+# 3. キャッシュをクリア
+rm -rf .next node_modules/.cache
+npm run dev
+```
+
+### 動画生成が遅い、またはタイムアウト
+
+**原因**: mulmocastは初回生成時に時間がかかります（15-60秒）
+
+**対策**:
+- `route.ts`の`timeout`を増やす（現在60秒）
+- OpenAI APIのレート制限を確認
+- より高速なプランにアップグレード
+
+### 音声が生成されない
+
+**原因**: SHISA_API_KEYが設定されていない（オプション機能）
+
+**解決方法**:
+- Shisa AIの音声機能は**オプション**です
+- 設定しなくても動画は生成されます（音声なし）
+- 高品質な日本語音声が必要な場合のみ、[Shisa Talk](https://talk.shisa.ai/ja)からAPIキーを取得
+
+### mulmocastのバージョン確認
+
+```bash
+# インストール済みバージョンを確認
+npx mulmo --version
+
+# 最新版へアップデート
+npm install mulmocast@latest
+```
 
 ## 免責事項 / Disclaimer
 
