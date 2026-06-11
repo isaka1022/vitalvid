@@ -1,5 +1,12 @@
 import { BloodTestData, RiskLevel, RiskEvaluation } from "@/types/blood-test";
 
+// Reference value sources:
+// - LH ratio, HDL, triglyceride thresholds:
+//     Japan Atherosclerosis Society, "Guidelines for Prevention of Atherosclerotic
+//     Cardiovascular Diseases 2022" (動脈硬化性疾患予防ガイドライン2022)
+// - Fasting glucose ≥126 mg/dL diabetes diagnostic threshold:
+//     American Diabetes Association (ADA) Standards of Medical Care in Diabetes
+
 export function evaluateLHRatio(value: number): RiskEvaluation {
   let risk_level: RiskLevel;
   let recommendations: string[];

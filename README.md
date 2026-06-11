@@ -87,6 +87,8 @@ brew install ffmpeg
 sudo apt update && sudo apt install ffmpeg
 ```
 
+> **Note — Vercel live demo**: The hosted demo on Vercel cannot generate videos because Vercel's serverless runtime does not include ffmpeg. Clicking "動画を見る" will fall back to text + audio mode automatically. For the full video-generation experience, run the app locally with ffmpeg installed as shown above.
+
 ### 1. Install dependencies
 
 ```bash
@@ -159,9 +161,13 @@ Ensure `.env.local` exists at the project root with `OPENAI_API_KEY=sk-...` and 
 **No voice narration**
 Shisa AI voice is optional. Videos are generated without audio if `SHISA_API_KEY` is not set.
 
-## Disclaimer
+## Medical Disclaimer
 
-This application does not provide medical diagnosis. Always consult a qualified healthcare professional for medical concerns.
+- This application is for **informational purposes only** and does not constitute medical advice, diagnosis, or treatment.
+- It is not a substitute for professional medical diagnosis or the care of a licensed healthcare provider.
+- Reference ranges used in this application are general population values intended as educational guidance only; individual normal ranges may vary based on age, sex, and clinical context.
+- If you have questions or concerns about your health or blood test results, consult a qualified healthcare professional.
+- This application is **not a medical device** and has not been evaluated or approved by any medical regulatory authority.
 
 ## License
 
