@@ -2,278 +2,167 @@
 
 **Your Health, Explained in Seconds**
 
-血液検査結果を動画で解説する次世代健康ダッシュボード
+A next-generation health dashboard that explains blood test results through AI-generated videos with Japanese voice narration.
 
-## 概要 / Overview
+## Live Demo
 
-VitalVidは、血液検査の数値を誰でも理解できるように、AI生成動画で解説する健康管理システムです。
+**Deploy URL**: https://vitalvid-7iogk2utw-isaka1022s-projects.vercel.app
 
-- 🎥 **動画をUIとして使用** - クリックするだけで即座に解説動画を生成
-- 🎙️ **高品質な日本語音声** - Shisa AI TTSによる自然な音声ナレーション
-- 🌐 **AI翻訳機能** - Shisa AIによる日英自動翻訳（リアルタイム）
-- 🎤 **音声Q&A** - 音声で質問して音声で答えが返ってくる対話型システム
-- 🧪 **精密栄養学に基づく解説** - LH比、血糖値、HDL/LDLなど主要指標を分析
-- 💡 **具体的なアクションプラン** - 改善のための実践的なアドバイスを提供
+![VitalVid Screenshot](スクリーンショット%202025-11-12%2020.13.17.png)
 
-## 🌐 ライブデモ / Live Demo
+## Overview
 
-本番環境で動作中のアプリケーションをご覧ください：
+VitalVid takes your blood test numbers and instantly generates short AI videos explaining what each metric means, your risk level, and concrete action steps — all narrated in natural Japanese via Shisa AI TTS.
 
-**🚀 デプロイURL**: https://vitalvid-7iogk2utw-isaka1022s-projects.vercel.app
+**Key idea**: Video is the UI primitive. Instead of charts and tables, each health metric gets its own AI-generated video explanation.
 
-### 利用可能な機能
-- 🎥 血液検査結果の動画解説生成
-- 🎙️ AI音声ナレーション（Shisa AI TTS）
-- 🌐 日英リアルタイム翻訳（Shisa AI Translation）
-- 🎤 音声Q&A（音声で質問→音声で回答）
-- 📊 リスクレベル分析とアクションプラン
+## Features
 
-## 技術スタック / Tech Stack
+- **AI Video Generation** — Click any metric card to generate a personalized explanation video powered by mulmocast + GPT-4
+- **Japanese Voice Narration** — High-quality speech synthesis via Shisa AI TTS
+- **Real-time Translation** — Bilingual (Japanese/English) narration scripts via Shisa AI
+- **Voice Q&A** — Ask health questions by voice; get spoken answers (ASR → GPT-4 → TTS pipeline)
+- **Risk Level Analysis** — Color-coded risk evaluation (Normal / Warning / Danger) for key metabolic markers
+- **Actionable Advice** — Specific improvement recommendations alongside each video
 
-- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
-- **AI**: OpenAI GPT-4 (スクリプト生成 & Q&A応答)
-- **TTS**: Shisa AI (日本語音声合成) 🆕
-- **ASR**: Shisa AI (音声認識) 🆕
-- **Translation**: Shisa AI (日英翻訳) 🆕
-- **Video Generation**: mulmocast-cli (AI動画生成)
-- **Deployment**: Vercel
+### Analyzed Metrics
 
-## セットアップ / Setup
+| Metric | Indicator |
+|---|---|
+| LH Ratio (LDL/HDL) | Atherosclerosis risk |
+| Blood Glucose | Diabetes risk |
+| HDL Cholesterol | Good cholesterol level |
+| Triglycerides | Metabolic syndrome risk |
 
-### 1. 依存関係のインストール
+## Tech Stack
 
-```bash
-npm install
-```
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) + TypeScript |
+| Styling | Tailwind CSS |
+| AI / LLM | OpenAI GPT-4 (script generation, Q&A) |
+| Video Generation | mulmocast v2 |
+| TTS | Shisa AI (Japanese speech synthesis) |
+| ASR | Shisa AI (speech recognition) |
+| Translation | Shisa AI (JA ↔ EN) |
+| Deployment | Vercel |
 
-### 2. 環境変数の設定
-
-`.env.local`ファイルを作成し、以下を設定:
-
-```bash
-# 必須: OpenAI API Key
-OPENAI_API_KEY=your_openai_api_key_here
-
-# オプション: Shisa AI API Key (日本語TTS音声合成)
-SHISA_API_KEY=your_shisa_api_key_here
-```
-
-**APIキーの取得方法:**
-- **OpenAI**: [OpenAI Platform](https://platform.openai.com/)から取得
-- **Shisa AI** (オプション): [Shisa Talk](https://talk.shisa.ai/ja)でアカウント作成後、APIキーを取得
-  - Shisa AIを設定すると、高品質な日本語音声ナレーションが追加されます
-  - 未設定の場合は、音声なしで動画が生成されます
-
-### 3. 開発サーバーの起動
-
-```bash
-npm run dev
-```
-
-ブラウザで[http://localhost:3000](http://localhost:3000)を開きます。
-
-### 4. mulmocastの設定 (動画生成用)
-
-mulmocastは既にプロジェクトにインストールされていますが、ffmpegが必要です：
-
-```bash
-# ffmpegのインストール (macOS)
-brew install ffmpeg
-
-# Linux (Ubuntu/Debian)
-sudo apt update && sudo apt install ffmpeg
-
-# Windows (Chocolatey)
-choco install ffmpeg
-
-# または公式サイトからダウンロード
-# https://ffmpeg.org/download.html
-```
-
-**動画生成のテスト:**
-
-```bash
-# テスト動画を生成して動作確認
-npx mulmo movie test-mulmo.json -o public/videos/test-output.mp4
-
-# 成功すると以下のファイルが生成されます:
-# public/videos/test-output.mp4/mulmo-xxx_en.mp4
-```
-
-## 使い方 / Usage
-
-### 基本機能
-1. **データ入力**: 血液検査の数値を入力するか、サンプルデータを選択
-2. **分析**: 「分析開始」ボタンをクリック
-3. **ダッシュボード**: 各指標のリスクレベルが色分けされて表示
-4. **動画視聴**: 気になる指標の「動画を見る」ボタンをクリック
-5. **音声ナレーション**: Shisa AI APIキーを設定している場合、自動で日本語音声ナレーションが生成されます 🎙️
-6. **英語翻訳**: 解説テキストが自動的に英語に翻訳されます 🌐
-7. **改善アクション**: 動画・音声と共に具体的な改善方法を確認
-
-### 音声Q&A機能 🆕
-1. **マイクボタンをクリック**: 録音を開始
-2. **質問を話す**: 「LH比って何ですか？」など
-3. **録音停止**: もう一度ボタンをクリック
-4. **AI回答**: GPT-4が回答を生成し、音声で読み上げます
-   - 音声認識（ASR）で質問をテキスト化
-   - GPT-4で回答を生成
-   - 音声合成（TTS）で回答を音声化
-
-## 主要機能 / Key Features
-
-### 解析対象指標
-
-- **LH比** (LDL/HDL比) - 動脈硬化リスクの指標
-- **血糖値** - 糖尿病リスクの指標
-- **HDLコレステロール** - 善玉コレステロール
-- **中性脂肪** - メタボリックシンドロームの指標
-
-### リスク評価
-
-- 🟢 **正常範囲** (Normal) - 健康的な状態
-- 🟡 **注意** (Warning) - 改善の余地あり
-- 🔴 **要改善** (Danger) - 医師への相談を推奨
-
-## プロジェクト構造
+## Project Structure
 
 ```
 vitalvid/
 ├── app/
 │   ├── api/
-│   │   ├── generate-video/
-│   │   │   └── route.ts          # 動画生成API
-│   │   └── voice-qa/
-│   │       └── route.ts          # 音声Q&A API 🆕
-│   ├── globals.css                # グローバルスタイル
-│   ├── layout.tsx                 # ルートレイアウト
-│   └── page.tsx                   # メインページ
+│   │   ├── generate-video/route.ts   # Video generation endpoint
+│   │   └── voice-qa/route.ts         # Voice Q&A endpoint
+│   ├── layout.tsx
+│   └── page.tsx                      # Main dashboard page
 ├── components/
-│   ├── DataInputForm.tsx          # データ入力フォーム
-│   ├── MetricCard.tsx             # 指標カード
-│   └── VoiceQA.tsx                # 音声Q&Aコンポーネント 🆕
+│   ├── DataInputForm.tsx             # Blood test data input
+│   ├── MetricCard.tsx                # Per-metric risk card
+│   └── VoiceQA.tsx                   # Voice Q&A component
 ├── lib/
-│   ├── prompts.ts                 # GPT-4プロンプト
-│   ├── risk-evaluator.ts          # リスク評価ロジック
-│   ├── sample-data.ts             # サンプルデータ
-│   ├── shisa-tts.ts               # Shisa AI TTS統合
-│   ├── shisa-translation.ts       # Shisa AI翻訳統合 🆕
-│   ├── shisa-asr.ts               # Shisa AI ASR統合 🆕
-│   └── utils.ts                   # ユーティリティ
-├── types/
-│   └── blood-test.ts              # TypeScript型定義
-├── public/
-│   └── videos/                    # 生成動画の保存先
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-└── next.config.mjs
+│   ├── prompts.ts                    # GPT-4 prompt templates
+│   ├── risk-evaluator.ts             # Risk level logic
+│   ├── sample-data.ts                # Demo data
+│   ├── shisa-tts.ts                  # Shisa AI TTS integration
+│   ├── shisa-translation.ts          # Shisa AI translation integration
+│   └── shisa-asr.ts                  # Shisa AI ASR integration
+└── types/
+    └── blood-test.ts                 # TypeScript type definitions
 ```
 
-## 開発ロードマップ / Roadmap
+## Setup
 
-### Phase 1 (MVP) ✅
-- [x] 血液検査データ入力UI
-- [x] ダッシュボード表示
-- [x] リスク評価ロジック
-- [x] GPT-4スクリプト生成
-- [x] mulmocast統合
-- [x] 動画プレーヤー
+### Prerequisites
 
-### Phase 2 (完了) ✅
-- [x] Shisa AI TTS統合（日本語音声ナレーション）
-- [x] Shisa AI翻訳統合（日英リアルタイム翻訳）
-- [x] Shisa AI ASR統合（音声認識）
-- [x] 音声Q&A機能（音声で質問→音声で回答）
-
-### Phase 3 (予定)
-- [ ] PDF/画像からのOCR自動抽出
-- [ ] 複数検査結果の推移グラフ
-- [ ] ユーザー認証・データ保存
-- [ ] トーキングアバター (D-ID/Runway)
-- [ ] 動画ダウンロード機能
-- [ ] 音声を動画に統合（ffmpeg）
-
-### Phase 4 (予定)
-- [ ] B2B SaaS機能
-- [ ] 企業向け管理画面
-- [ ] API/SDK提供
-- [ ] 多言語対応（中国語、韓国語など）
-
-## トラブルシューティング / Troubleshooting
-
-### エラー: "OpenAI API key is required"
-
-**原因**: OPENAI_API_KEYが設定されていない、または読み込まれていない
-
-**解決方法**:
-1. `.env.local`ファイルがプロジェクトルートに存在することを確認
-2. ファイル内に`OPENAI_API_KEY=sk-proj-xxx`が正しく記載されているか確認
-3. 開発サーバーを再起動（Ctrl+C → `npm run dev`）
-
-### エラー: "動画生成に失敗しました"
-
-**原因**:
-- mulmocastのインストール不完全
-- ffmpegがインストールされていない
-- OpenAI APIの制限
-
-**解決方法**:
+- Node.js 18+
+- ffmpeg (required by mulmocast for video rendering)
 
 ```bash
-# 1. ffmpegがインストールされているか確認
-ffmpeg -version
+# macOS
+brew install ffmpeg
 
-# 2. mulmocastを再インストール
-npm install mulmocast@latest
+# Ubuntu/Debian
+sudo apt update && sudo apt install ffmpeg
+```
 
-# 3. キャッシュをクリア
-rm -rf .next node_modules/.cache
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment variables
+
+Create `.env.local` in the project root:
+
+```bash
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional: enables Japanese voice narration
+SHISA_API_KEY=your_shisa_api_key_here
+```
+
+- **OpenAI**: Get your key at [platform.openai.com](https://platform.openai.com/)
+- **Shisa AI** (optional): Sign up at [talk.shisa.ai](https://talk.shisa.ai/ja) — without this, videos are generated without voice narration
+
+### 3. Start the dev server
+
+```bash
 npm run dev
 ```
 
-### 動画生成が遅い、またはタイムアウト
+Open [http://localhost:3000](http://localhost:3000).
 
-**原因**: mulmocastは初回生成時に時間がかかります（15-60秒）
-
-**対策**:
-- `route.ts`の`timeout`を増やす（現在60秒）
-- OpenAI APIのレート制限を確認
-- より高速なプランにアップグレード
-
-### 音声が生成されない
-
-**原因**: SHISA_API_KEYが設定されていない（オプション機能）
-
-**解決方法**:
-- Shisa AIの音声機能は**オプション**です
-- 設定しなくても動画は生成されます（音声なし）
-- 高品質な日本語音声が必要な場合のみ、[Shisa Talk](https://talk.shisa.ai/ja)からAPIキーを取得
-
-### mulmocastのバージョン確認
+### 4. Verify mulmocast (video generation)
 
 ```bash
-# インストール済みバージョンを確認
-npx mulmo --version
-
-# 最新版へアップデート
-npm install mulmocast@latest
+npx mulmo movie test-mulmo.json -o public/videos/test-output.mp4
 ```
 
-## 免責事項 / Disclaimer
+## Usage
 
-⚠️ **重要**: 本サービスは医師の診断に代わるものではありません。健康上の懸念がある場合は、必ず医療専門家にご相談ください。
+1. **Enter data** — Input your blood test values or load sample data
+2. **Analyze** — Click "分析開始" to evaluate all metrics
+3. **Watch** — Click "動画を見る" on any metric card to generate a video explanation
+4. **Ask** — Use the Voice Q&A button to ask follow-up questions by voice
 
-This service does not replace professional medical diagnosis. Please consult healthcare professionals for any medical concerns.
+## Roadmap
 
-## ライセンス / License
+### Completed
+- [x] Blood test data input UI + dashboard
+- [x] GPT-4 script generation + mulmocast video pipeline
+- [x] Shisa AI TTS, ASR, and translation integration
+- [x] Voice Q&A (speech-in / speech-out)
 
-MIT License
+### Planned
+- [ ] OCR extraction from PDF/image lab reports
+- [ ] Historical trend charts (multiple test results over time)
+- [ ] User authentication and data persistence
+- [ ] Talking avatar (D-ID / Runway)
+- [ ] Multi-language support (Chinese, Korean)
+- [ ] B2B SaaS features with admin dashboard
 
-## お問い合わせ / Contact
+## Troubleshooting
 
-質問や提案がある場合は、GitHubのIssuesでお知らせください。
+**`Error: OpenAI API key is required`**
+Ensure `.env.local` exists at the project root with `OPENAI_API_KEY=sk-...` and restart the dev server.
 
----
+**Video generation fails or times out**
+- Confirm ffmpeg is installed: `ffmpeg -version`
+- Reinstall mulmocast: `npm install mulmocast@latest`
+- Clear cache: `rm -rf .next node_modules/.cache && npm run dev`
+- First-time generation takes 15–60 seconds due to mulmocast initialization
 
-**VitalVid** - 動画をプリミティブとして使う、新しい健康体験 🩺✨
+**No voice narration**
+Shisa AI voice is optional. Videos are generated without audio if `SHISA_API_KEY` is not set.
+
+## Disclaimer
+
+This application does not provide medical diagnosis. Always consult a qualified healthcare professional for medical concerns.
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
