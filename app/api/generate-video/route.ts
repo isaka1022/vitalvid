@@ -76,11 +76,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Declare timestamp here so it is available for both the audio file name
+    // below and the mulmo script file name further down.
+    const timestamp = Date.now();
+
     // Generate audio using Shisa AI TTS (optional)
     let audioFileName: string | null = null;
     if (process.env.SHISA_API_KEY) {
       console.log("Generating audio with Shisa AI TTS...");
-      
+
       const ttsResult = await generateShisaTTS({
         text: narrationText,
         voice: "ja-JP-1", // 日本語音声
@@ -121,7 +125,6 @@ export async function POST(request: NextRequest) {
     };
 
     // Save mulmo script to file
-    const timestamp = Date.now();
     const scriptFileName = `mulmo-${metricType}-${timestamp}.json`;
     const scriptPath = path.join(process.cwd(), "public", "videos", scriptFileName);
 
