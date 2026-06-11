@@ -139,13 +139,21 @@ npx mulmo movie test-mulmo.json -o public/videos/test-output.mp4
 - [x] Shisa AI TTS, ASR, and translation integration
 - [x] Voice Q&A (speech-in / speech-out)
 
-### Planned
-- [ ] OCR extraction from PDF/image lab reports
-- [ ] Historical trend charts (multiple test results over time)
-- [ ] User authentication and data persistence
-- [ ] Talking avatar (D-ID / Runway)
-- [ ] Multi-language support (Chinese, Korean)
-- [ ] B2B SaaS features with admin dashboard
+### Now
+- [ ] Upgrade mulmocast 2.0.0 → 2.6.x and adopt MulmoScript version 1.1
+
+### Next
+- [ ] OCR / PDF import — extract blood test values via OpenAI Vision
+- [ ] Additional metrics — HbA1c, eGFR, uric acid, AST, ALT
+- [ ] Migrate video rendering to Remotion — resolves Vercel serverless limitation
+- [ ] Supabase Auth + result history — save and compare test results over time
+- [ ] Trend charts — visualize biomarker changes across multiple test dates
+
+### Later
+- [ ] Talking avatar narration — D-ID / HeyGen integration
+- [ ] B2B admin dashboard — team / clinic management portal
+- [ ] Multi-language support — English, Chinese, Korean UI
+- [ ] Privacy policy and terms of service pages
 
 ## Troubleshooting
 
